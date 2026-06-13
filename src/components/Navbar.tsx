@@ -26,7 +26,7 @@ export function Navbar() {
         style={{
           pointerEvents: 'all',
           width: '100%',
-          maxWidth: '860px',
+          maxWidth: '989px',
           height: '96px',
           display: 'flex',
           alignItems: 'center',
@@ -46,7 +46,7 @@ export function Navbar() {
           <img
             src="/D_isologo.png"
             alt="Dokimatik"
-            style={{ height: '44px', width: 'auto', display: 'block' }}
+            style={{ height: '51px', width: 'auto', display: 'block' }}
           />
           <span
             className="navbar-version"
