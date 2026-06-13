@@ -312,8 +312,8 @@ function RadarChart({ scores, radarLabels }: RadarChartProps) {
       {/* Score area */}
       {scorePts && (
         <>
-          <path d={polyPath(scorePts)} fill="rgba(255,99,99,0.1)" />
-          <path d={polyPath(scorePts)} fill="none" stroke="#ff6363" strokeWidth="1.5" strokeOpacity="0.7" />
+          <path d={polyPath(scorePts)} fill="rgba(240,61,48,0.1)" />
+          <path d={polyPath(scorePts)} fill="none" stroke="#f03d30" strokeWidth="1.5" strokeOpacity="0.7" />
         </>
       )}
 
@@ -322,7 +322,7 @@ function RadarChart({ scores, radarLabels }: RadarChartProps) {
         const v = scores![dim.id]
         if (v === null || v === undefined) return null
         const p = pt(i, (v / 10) * MAX_R)
-        return <circle key={dim.id} cx={p.x} cy={p.y} r={3} fill="#ff6363" />
+        return <circle key={dim.id} cx={p.x} cy={p.y} r={3} fill="#f03d30" />
       })}
 
       {/* Outer vertex dots */}

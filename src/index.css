@@ -11,7 +11,7 @@
   --color-text-secondary: #9c9c9d;
   --color-text-tertiary:  #6a6b6c;
 
-  --color-accent:   #ff6363;
+  --color-accent:   #f03d30;
   --color-cta-bg:   #e6e6e6;
   --color-cta-text: #2f3031;
   --color-mint:     #59d499;
@@ -51,7 +51,7 @@ body {
 ::-webkit-scrollbar-thumb  { background: #363739; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #4a4b4c; }
 
-::selection { background: rgba(255,99,99,0.25); color: #ffffff; }
+::selection { background: rgba(240,61,48,0.25); color: #ffffff; }
 
 :focus-visible {
   outline: 2px solid #56c2ff;
