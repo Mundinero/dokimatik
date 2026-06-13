@@ -1,8 +1,8 @@
 import { useLanguage } from '../context/LanguageContext'
 import type { Lang } from '../constants/i18n'
 
-// Altura total del navbar flotante: 10px padding-top + 96px pill + 10px padding-bottom
-export const NAVBAR_HEIGHT = 116
+// Altura total del navbar flotante: 10px padding-top + 86px pill + 10px padding-bottom
+export const NAVBAR_HEIGHT = 106
 
 export function Navbar() {
   const { lang, setLang } = useLanguage()
@@ -27,7 +27,7 @@ export function Navbar() {
           pointerEvents: 'all',
           width: '100%',
           maxWidth: '989px',
-          height: '96px',
+          height: '86px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

@@ -11,7 +11,7 @@ export function ScorecardShell() {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        paddingTop: '80px',
+        paddingTop: '116px',
         paddingBottom: '48px',
         background: '#040506',
       }}
