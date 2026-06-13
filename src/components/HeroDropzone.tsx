@@ -37,7 +37,7 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: '68px',
+        paddingTop: '116px',
         overflow: 'hidden',
       }}
     >

@@ -1,8 +1,8 @@
 import { useLanguage } from '../context/LanguageContext'
 import type { Lang } from '../constants/i18n'
 
-// Altura total del navbar flotante: 10px padding-top + 48px pill + 10px padding-bottom
-export const NAVBAR_HEIGHT = 68
+// Altura total del navbar flotante: 10px padding-top + 96px pill + 10px padding-bottom
+export const NAVBAR_HEIGHT = 116
 
 export function Navbar() {
   const { lang, setLang } = useLanguage()
@@ -26,8 +26,8 @@ export function Navbar() {
         style={{
           pointerEvents: 'all',
           width: '100%',
-          maxWidth: '1720px',
-          height: '48px',
+          maxWidth: '860px',
+          height: '96px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -46,19 +46,8 @@ export function Navbar() {
           <img
             src="/D_isologo.png"
             alt="Dokimatik"
-            style={{ height: '28px', width: 'auto', display: 'block' }}
+            style={{ height: '44px', width: 'auto', display: 'block' }}
           />
-          <span
-            style={{
-              fontFamily: '"Satoshi", system-ui, sans-serif',
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '0.09em',
-              color: '#ffffff',
-            }}
-          >
-            DOKIMATIK
-          </span>
           <span
             className="navbar-version"
             style={{
