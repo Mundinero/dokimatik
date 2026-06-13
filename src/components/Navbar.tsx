@@ -26,7 +26,7 @@ export function Navbar() {
         style={{
           pointerEvents: 'all',
           width: '100%',
-          maxWidth: '860px',
+          maxWidth: '1720px',
           height: '48px',
           display: 'flex',
           alignItems: 'center',
@@ -44,10 +44,21 @@ export function Navbar() {
         {/* ── Logo + wordmark ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
-            src="/D_logotipo.png"
+            src="/D_isologo.png"
             alt="Dokimatik"
-            style={{ height: '22px', width: 'auto', display: 'block' }}
+            style={{ height: '28px', width: 'auto', display: 'block' }}
           />
+          <span
+            style={{
+              fontFamily: '"Satoshi", system-ui, sans-serif',
+              fontWeight: 700,
+              fontSize: '13px',
+              letterSpacing: '0.09em',
+              color: '#ffffff',
+            }}
+          >
+            DOKIMATIK
+          </span>
           <span
             className="navbar-version"
             style={{

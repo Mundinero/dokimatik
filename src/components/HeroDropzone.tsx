@@ -70,24 +70,6 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
         }}
       />
 
-      {/* Isologo */}
-      <div
-        className="animate-fade-in"
-        style={{ position: 'relative', marginBottom: '28px' }}
-      >
-        <img
-          src="/D_isologo.png"
-          alt=""
-          aria-hidden="true"
-          style={{
-            width: '80px',
-            height: '80px',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 0 18px rgba(255,99,99,0.6)) drop-shadow(0 0 42px rgba(255,60,60,0.28))',
-          }}
-        />
-      </div>
-
       {/* Eyebrow */}
       <div
         className="animate-fade-in"
