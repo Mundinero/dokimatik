@@ -5,6 +5,16 @@
 
 ---
 
+## Estado actual del proyecto
+
+- **Ruta local:** `/Users/azahed/Documents/Dokimatik` (case-insensitive en macOS → también accesible como `DOKIMATIK`)
+- **GitHub:** https://github.com/Mundinero/dokimatik
+- **Vercel (producción):** https://dokimatik.vercel.app
+- **Fase completada:** Phase 1 (UI) + Phase 2 (pipeline de evaluación)
+- **Pendiente:** Agregar `ANTHROPIC_API_KEY` en Vercel → Settings → Environment Variables
+
+---
+
 ## Stack & Arquitectura
 
 | Capa | Tecnología |
@@ -12,31 +22,38 @@
 | Frontend | React 18 + TypeScript |
 | Build | Vite 5 |
 | Estilos | Tailwind CSS v4 (CSS-first config, `@theme` block en `index.css`) |
-| Fonts | Inter 400/500/600 (Google Fonts) · Geist Mono 400/500 (Google Fonts) |
+| Fonts | Satoshi 400/500/700 (Fontshare) · Geist Mono 400/500 (Google Fonts) |
 | Parsing ZIP | JSZip (browser-side, sin backend) |
-| IA | Claude API (`claude-sonnet-4-6`) — vía Vercel Functions (pendiente) |
-| Deploy | Vercel (planificado) |
+| IA | Claude API (`claude-sonnet-4-6`) — vía Vercel Function `api/evaluate.ts` |
+| Deploy | Vercel → https://dokimatik.vercel.app |
 | Package manager | npm |
 
 ### Estructura de directorios
 
 ```
+api/
+  evaluate.ts               — Vercel Function: proxy seguro a Claude API (usa ANTHROPIC_API_KEY server-side)
+
 src/
-  App.tsx                   — Raíz: layout, estado de fase (idle/loading/result)
-  main.tsx                  — Entry point
-  index.css                 — Tailwind v4 + tokens de diseño + animations
+  App.tsx                   — Raíz: estados isLoading/result, scroll-snap a scorecard al subir ZIP
+  main.tsx                  — Entry point, envuelve <App> con <LanguageProvider>
+  index.css                 — Tailwind v4 + tokens + keyframes + clases responsive
   constants/
-    design.ts               — Todos los tokens de color, tipografía, radios, sombras
-    rubric.ts               — Las 9 dimensiones + lógica de peso + tipos de resultado
+    design.ts               — Tokens de color, tipografía, radios, sombras, scoreColor(), scoreLabel()
+    rubric.ts               — 9 dimensiones, pesos, EvaluationResult, computeWeightedScore()
+    i18n.ts                 — Traducciones EN/ES completas; type T = union de ambas
+  context/
+    LanguageContext.tsx      — Provider + hook useLanguage(); detecta idioma del browser
   components/
-    Navbar.tsx              — Header fijo con logo, versión, link GitHub
-    HeroDropzone.tsx        — Zona de carga .zip (drag & drop + file picker)
-    ScorecardShell.tsx      — Scorecard en estado vacío/skeleton
-    Scorecard.tsx           — (pendiente) Scorecard con datos reales
+    Navbar.tsx              — Floating glass pill (Raycast-style), max 860px, LangToggle EN/ES
+    HeroDropzone.tsx        — Drag & drop ZIP, gradiente rojo multi-stop + blur, binary grid
+    DotGrid.tsx             — Canvas interactivo: malla de 0/1, flip rápido cerca del cursor
+    ScorecardShell.tsx      — Scorecard vacío/skeleton (estado antes de evaluar)
+    Scorecard.tsx           — Scorecard con datos reales: score, radar, dimensiones, recomendaciones
   lib/
-    parseZip.ts             — (pendiente) Extracción de árbol de archivos con JSZip
-    buildPrompt.ts          — (pendiente) Construir el summary estructurado para Claude
-    callClaude.ts           — (pendiente) Wrapper de la Claude API
+    parseZip.ts             — JSZip: extrae file tree + key files + code snippets (máx 200 líneas)
+    buildPrompt.ts          — Construye el prompt estructurado para Claude con rúbrica + schema JSON
+    callClaude.ts           — Dev: llama API directo (VITE_ANTHROPIC_API_KEY) · Prod: /api/evaluate
 ```
 
 ---
@@ -63,7 +80,7 @@ src/
 
 ### Tipografía
 
-- **Sans:** Inter — pesos 400, 500, 600
+- **Sans:** Satoshi (Fontshare) — pesos 400, 500, 700
 - **Mono:** Geist Mono — scores, versiones, file paths, badges de código
 - **Letter-spacing headlines:**
   - 24px → `-0.05px`
@@ -178,7 +195,7 @@ El parsing ocurre 100% en el browser con JSZip. Nunca se sube ningún archivo.
 - ❌ Usar `accent` (`#ff6363`) como fill de botones — solo para logos y estados
 - ❌ Sombras de colores — solo monocromáticas
 - ❌ Múltiples colores de acento compitiendo en la misma vista
-- ❌ Tipografía system-ui sin haber cargado Inter primero
+- ❌ Tipografía system-ui sin haber cargado Satoshi primero
 
 ### Código
 - ❌ Crear archivos `.md` de documentación sin que el usuario lo pida
@@ -198,7 +215,21 @@ El parsing ocurre 100% en el browser con JSZip. Nunca se sube ningún archivo.
 ## Variables de entorno requeridas
 
 ```env
-VITE_ANTHROPIC_API_KEY=   # solo para desarrollo local
+VITE_ANTHROPIC_API_KEY=   # solo para desarrollo local — llama a Claude API directo desde browser
 ```
 
-En producción: la key vive en el servidor (Vercel Function), nunca en el cliente.
+En producción: la key vive en el servidor como `ANTHROPIC_API_KEY` (sin prefijo VITE_).
+Agregarla en: Vercel Dashboard → dokimatik → Settings → Environment Variables.
+
+---
+
+## Decisiones de diseño implementadas
+
+- **Layout:** scroll-snap vertical (`y mandatory`), dos secciones de 100vh exactas
+- **Hero gradient:** `radial-gradient` rojo multi-stop + `filter: blur(36px)` + `inset: -60px` para evitar color banding
+- **Headline:** `display: flex; flex-wrap: wrap` con dos spans `white-space: nowrap` — rompe sólo en el punto intermedio de la oración al estrechar la ventana
+- **Navbar:** `position: fixed`, floating glass pill centrada `max-width: 860px`, `pointerEvents: none` en el wrapper / `all` en el `<nav>`
+- **Scorecard vacío → real:** `ScorecardShell` se reemplaza por `Scorecard` cuando `result !== null` en App.tsx
+- **i18n:** `type T = (typeof translations)[keyof typeof translations]` — union de EN y ES para que ambas sean asignables al contexto
+- **Slogan:** EN "Real code. No coating." / ES "Código real. Nada superficial." — "Real"/"real" en `#ff6363`
+- **Eyebrow:** EN "The Touchstone for Vibe Code" / ES "La Piedra de Toque para Vibe Code" — texto rojo con `text-shadow` glow, sin recuadro
