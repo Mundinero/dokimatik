@@ -42,19 +42,12 @@ export function Navbar() {
         }}
       >
         {/* ── Logo + wordmark ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-          <LogoMark />
-          <span
-            style={{
-              fontFamily: '"Satoshi", system-ui, sans-serif',
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '0.09em',
-              color: '#ffffff',
-            }}
-          >
-            DOKIMATIK
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img
+            src="/D_logotipo.png"
+            alt="Dokimatik"
+            style={{ height: '22px', width: 'auto', display: 'block' }}
+          />
           <span
             className="navbar-version"
             style={{
@@ -168,15 +161,6 @@ function Divider() {
   )
 }
 
-function LogoMark() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-      <rect x="1" y="1" width="20" height="20" rx="5" stroke="#ff6363" strokeWidth="1.5" />
-      <circle cx="11" cy="11" r="4" fill="#ff6363" fillOpacity="0.15" />
-      <circle cx="11" cy="11" r="2" fill="#ff6363" />
-    </svg>
-  )
-}
 
 function GitHubIcon() {
   return (
