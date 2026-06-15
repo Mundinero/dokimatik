@@ -12,8 +12,8 @@ interface ClaudePayload {
   hasAgentMemory:  boolean
 }
 
-export async function evaluate(project: ParsedProject): Promise<EvaluationResult> {
-  const raw = await callApi(buildPrompt(project))
+export async function evaluate(project: ParsedProject, lang: 'en' | 'es' = 'en'): Promise<EvaluationResult> {
+  const raw = await callApi(buildPrompt(project, lang))
 
   let payload: ClaudePayload
   try {

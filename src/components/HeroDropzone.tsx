@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import { DotGrid } from './DotGrid'
 
@@ -9,7 +9,7 @@ interface HeroDropzoneProps {
 }
 
 export function HeroDropzone({ onFileSelected, isLoading, error }: HeroDropzoneProps) {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const h = t.hero
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -157,36 +157,34 @@ export function HeroDropzone({ onFileSelected, isLoading, error }: HeroDropzoneP
           onDrop={handleDrop}
           style={{
             cursor: isLoading ? 'default' : 'pointer',
-            border: `1.5px dashed ${isDragging ? 'rgba(240,61,48,0.55)' : 'rgba(54,55,57,0.8)'}`,
+            border: isLoading
+              ? '1.5px solid rgba(240,61,48,0.25)'
+              : `1.5px dashed ${isDragging ? 'rgba(240,61,48,0.55)' : 'rgba(54,55,57,0.8)'}`,
             borderRadius: '11px',
             padding: '40px 32px',
-            background: isDragging ? 'rgba(240,61,48,0.04)' : 'rgba(7,8,10,0.7)',
+            background: isLoading
+              ? 'rgba(240,61,48,0.03)'
+              : isDragging ? 'rgba(240,61,48,0.04)' : 'rgba(7,8,10,0.7)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             gap: '12px',
-            transition: 'border-color 0.2s, background 0.2s, box-shadow 0.2s',
-            boxShadow: isDragging
-              ? '0 0 0 4px rgba(240,61,48,0.07), 0 4px 24px rgba(0,0,0,0.4)'
-              : '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)',
+            transition: 'border-color 0.4s, background 0.4s, box-shadow 0.4s',
+            boxShadow: isLoading
+              ? '0 0 0 4px rgba(240,61,48,0.05), 0 4px 32px rgba(240,61,48,0.08)'
+              : isDragging
+                ? '0 0 0 4px rgba(240,61,48,0.07), 0 4px 24px rgba(0,0,0,0.4)'
+                : '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)',
           }}
         >
-          {isLoading ? <LoadingSpinner /> : <UploadIcon dragging={isDragging} />}
+          {isLoading ? <PremiumLoader lang={lang} /> : <UploadIcon dragging={isDragging} />}
 
-          <div style={{ textAlign: 'center' }}>
-            <p
-              style={{
-                fontWeight: 500,
-                fontSize: '14px',
-                color: isDragging ? '#f03d30' : '#ffffff',
-                margin: '0 0 4px',
-                transition: 'color 0.2s',
-              }}
-            >
-              {isLoading ? h.dropzone_loading : isDragging ? h.dropzone_hover : h.dropzone_idle}
-            </p>
-            {!isLoading && (
+          {!isLoading && (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontWeight: 500, fontSize: '14px', color: isDragging ? '#f03d30' : '#ffffff', margin: '0 0 4px', transition: 'color 0.2s' }}>
+                {isDragging ? h.dropzone_hover : h.dropzone_idle}
+              </p>
               <p style={{ fontSize: '12px', color: '#6a6b6c', margin: 0 }}>
                 o{' '}
                 <span style={{ color: '#f03d30', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
@@ -194,19 +192,11 @@ export function HeroDropzone({ onFileSelected, isLoading, error }: HeroDropzoneP
                 </span>
                 {' '}{h.dropzone_hint}
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {!isLoading && (
-            <div
-              style={{
-                display: 'flex',
-                gap: '8px',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                marginTop: '4px',
-              }}
-            >
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '4px' }}>
               {['package.json', '.env.example', 'CLAUDE.md', 'Dockerfile'].map(f => (
                 <span
                   key={f}
@@ -337,34 +327,80 @@ function UploadIcon({ dragging }: { dragging: boolean }) {
   )
 }
 
-function LoadingSpinner() {
+function PremiumLoader({ lang }: { lang: 'en' | 'es' }) {
+  const steps = {
+    en: ['Parsing project files…', 'Analyzing architecture…', 'Running 9-dimension rubric…', 'Compiling scorecard…'],
+    es: ['Analizando archivos…',   'Evaluando arquitectura…', 'Aplicando rúbrica de 9 ejes…', 'Compilando scorecard…'],
+  }
+  const [idx, setIdx] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setIdx(i => (i + 1) % steps[lang].length), 2200)
+    return () => clearInterval(id)
+  }, [lang])
+
   return (
-    <div
-      style={{
-        width: '48px',
-        height: '48px',
-        borderRadius: '12px',
-        background: '#111214',
-        border: '1px solid rgba(240,61,48,0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#f03d30"
-        strokeWidth="2"
-        strokeLinecap="round"
-        aria-hidden="true"
-        style={{ animation: 'spin 0.8s linear infinite' }}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '4px 0' }}>
+      <style>{`
+        @keyframes spin-cw  { to { transform: rotate(360deg);  } }
+        @keyframes spin-ccw { to { transform: rotate(-360deg); } }
+        @keyframes dot-glow {
+          0%,100% { box-shadow: 0 0 6px 1px rgba(240,61,48,0.5); opacity: 0.8; }
+          50%      { box-shadow: 0 0 18px 4px rgba(240,61,48,0.9); opacity: 1; }
+        }
+      `}</style>
+
+      <div style={{ position: 'relative', width: '80px', height: '80px' }}>
+        {/* Outer ring — slow clockwise */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          border: '1px solid rgba(240,61,48,0.1)',
+          borderTopColor: 'rgba(240,61,48,0.6)',
+          borderRadius: '50%',
+          animation: 'spin-cw 2.8s linear infinite',
+        }} />
+        {/* Mid ring — counter-clockwise */}
+        <div style={{
+          position: 'absolute', inset: '14px',
+          border: '1px solid rgba(240,61,48,0.08)',
+          borderBottomColor: 'rgba(240,61,48,0.45)',
+          borderRightColor: 'rgba(240,61,48,0.2)',
+          borderRadius: '50%',
+          animation: 'spin-ccw 1.9s linear infinite',
+        }} />
+        {/* Inner ring — fast clockwise */}
+        <div style={{
+          position: 'absolute', inset: '28px',
+          border: '1.5px solid rgba(240,61,48,0.06)',
+          borderLeftColor: 'rgba(240,61,48,0.7)',
+          borderRadius: '50%',
+          animation: 'spin-cw 1.1s linear infinite',
+        }} />
+        {/* Center dot */}
+        <div style={{
+          position: 'absolute',
+          top: '50%', left: '50%',
+          width: '10px', height: '10px',
+          marginTop: '-5px', marginLeft: '-5px',
+          background: '#f03d30',
+          borderRadius: '50%',
+          animation: 'dot-glow 1.6s ease-in-out infinite',
+        }} />
+      </div>
+
+      {/* Cycling step text */}
+      <span
+        key={idx}
+        style={{
+          fontFamily: '"Geist Mono", monospace',
+          fontSize: '10px',
+          color: 'rgba(240,61,48,0.65)',
+          letterSpacing: '0.06em',
+          animation: 'fade-in 0.35s ease both',
+        }}
       >
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <path d="M12 2a10 10 0 1 0 10 10" />
-      </svg>
+        {steps[lang][idx]}
+      </span>
     </div>
   )
 }

@@ -5,9 +5,11 @@ import { ScorecardShell } from './components/ScorecardShell'
 import { Scorecard } from './components/Scorecard'
 import { parseZip } from './lib/parseZip'
 import { evaluate } from './lib/callClaude'
+import { useLanguage } from './context/LanguageContext'
 import type { EvaluationResult } from './constants/rubric'
 
 export default function App() {
+  const { lang } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [result,    setResult   ] = useState<EvaluationResult | null>(null)
   const [error,     setError    ] = useState<string | null>(null)
@@ -18,20 +20,21 @@ export default function App() {
     setResult(null)
     setError(null)
 
-    scrollRef.current?.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
-
     try {
       const parsed     = await parseZip(file)
-      const evaluation = await evaluate(parsed)
+      const evaluation = await evaluate(parsed, lang)
       setResult(evaluation)
+      // Scroll after result is ready so the user sees the scorecard with data
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+      }, 120)
     } catch (err) {
       console.error('Evaluation failed:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
-      scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [lang])
 
   return (
     <div style={{ height: '100vh', overflow: 'hidden', background: '#040506' }}>

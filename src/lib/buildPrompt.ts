@@ -1,10 +1,13 @@
 import type { ParsedProject } from './parseZip'
 
-export function buildPrompt(project: ParsedProject): string {
+export function buildPrompt(project: ParsedProject, lang: 'en' | 'es' = 'en'): string {
   const p: string[] = []
+  const langInstruction = lang === 'es'
+    ? 'All "justification" strings and recommendation "title"/"detail" fields MUST be written in Spanish.'
+    : 'All "justification" strings and recommendation "title"/"detail" fields MUST be written in English.'
 
   p.push('You are a senior software engineer evaluating a vibe-coded project for production readiness.')
-  p.push('Analyze the project below and return a JSON evaluation. Return ONLY valid JSON — no markdown fences, no explanation.\n')
+  p.push(`Analyze the project below and return a JSON evaluation. ${langInstruction} Return ONLY valid JSON — no markdown fences, no explanation.\n`)
 
   p.push('## FILE TREE')
   p.push(project.fileTree.slice(0, 80).join('\n'))
