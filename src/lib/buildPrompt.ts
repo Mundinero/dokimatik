@@ -7,7 +7,7 @@ export function buildPrompt(project: ParsedProject): string {
   p.push('Analyze the project below and return a JSON evaluation. Return ONLY valid JSON — no markdown fences, no explanation.\n')
 
   p.push('## FILE TREE')
-  p.push(project.fileTree.slice(0, 300).join('\n'))
+  p.push(project.fileTree.slice(0, 80).join('\n'))
   p.push('')
 
   for (const [path, content] of Object.entries(project.keyFiles)) {
@@ -18,7 +18,7 @@ export function buildPrompt(project: ParsedProject): string {
 
   const codeEntries = Object.entries(project.codeSnippets)
   if (codeEntries.length > 0) {
-    p.push(`## CODE SAMPLES (${codeEntries.length} files · first ${200} lines each)`)
+    p.push(`## CODE SAMPLES (${codeEntries.length} files · first 60 lines each)`)
     for (const [path, content] of codeEntries) {
       p.push(`### ${path}\n${content}\n`)
     }
@@ -58,5 +58,6 @@ export function buildPrompt(project: ParsedProject): string {
   "hasAgentMemory": true | false
 }`)
 
-  return p.join('\n')
+  const full = p.join('\n')
+  return full.length > 30_000 ? full.slice(0, 30_000) + '\n\n[truncated]' : full
 }

@@ -18,9 +18,9 @@ const KEY_FILENAMES = new Set([
 
 const CODE_EXTENSIONS   = new Set(['.ts', '.tsx', '.js', '.jsx', '.py', '.go', '.rb', '.rs'])
 const SKIP_PATTERN      = /node_modules|\.next[/\\]|[/\\]dist[/\\]|[/\\]build[/\\]|[/\\]\.git[/\\]|__pycache__|\.pyc$/
-const MAX_CODE_FILES    = 12
-const MAX_KEY_BYTES     = 8_000
-const MAX_CODE_LINES    = 200
+const MAX_CODE_FILES    = 5
+const MAX_KEY_BYTES     = 2_000
+const MAX_CODE_LINES    = 60
 
 function stripRoot(path: string) {
   return path.replace(/^[^/]+\//, '')
