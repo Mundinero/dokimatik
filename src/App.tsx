@@ -10,21 +10,35 @@ import type { EvaluationResult } from './constants/rubric'
 
 export default function App() {
   const { lang } = useLanguage()
-  const [isLoading, setIsLoading] = useState(false)
-  const [result,    setResult   ] = useState<EvaluationResult | null>(null)
-  const [error,     setError    ] = useState<string | null>(null)
+  const [isLoading,     setIsLoading    ] = useState(false)
+  const [resultsByLang, setResultsByLang] = useState<Partial<Record<'en' | 'es', EvaluationResult>>>({})
+  const [error,         setError        ] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Current result follows the active language toggle instantly
+  const result = resultsByLang[lang] ?? null
 
   const handleFileSelected = useCallback(async (file: File) => {
     setIsLoading(true)
-    setResult(null)
+    setResultsByLang({})
     setError(null)
 
     try {
-      const parsed     = await parseZip(file)
-      const evaluation = await evaluate(parsed, lang)
-      setResult(evaluation)
-      // Scroll after result is ready so the user sees the scorecard with data
+      const parsed = await parseZip(file)
+
+      // Evaluate both languages in parallel — toggle becomes instant after load
+      const [enRes, esRes] = await Promise.allSettled([
+        evaluate(parsed, 'en'),
+        evaluate(parsed, 'es'),
+      ])
+
+      const next: Partial<Record<'en' | 'es', EvaluationResult>> = {}
+      if (enRes.status === 'fulfilled') next.en = enRes.value
+      if (esRes.status === 'fulfilled') next.es = esRes.value
+
+      if (Object.keys(next).length === 0) throw new Error('Evaluation failed for both languages')
+
+      setResultsByLang(next)
       setTimeout(() => {
         scrollRef.current?.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
       }, 120)
@@ -34,7 +48,7 @@ export default function App() {
     } finally {
       setIsLoading(false)
     }
-  }, [lang])
+  }, [])
 
   return (
     <div style={{ height: '100vh', overflow: 'hidden', background: '#040506' }}>
