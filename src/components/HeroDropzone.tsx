@@ -5,9 +5,10 @@ import { DotGrid } from './DotGrid'
 interface HeroDropzoneProps {
   onFileSelected: (file: File) => void
   isLoading: boolean
+  error?: string | null
 }
 
-export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
+export function HeroDropzone({ onFileSelected, isLoading, error }: HeroDropzoneProps) {
   const { t } = useLanguage()
   const h = t.hero
   const [isDragging, setIsDragging] = useState(false)
@@ -52,15 +53,15 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
           inset: '-60px',
           background: `
             radial-gradient(ellipse 110% 70% at 50% -5%,
-              rgba(255,40,40,0.32) 0%,
-              rgba(220,28,28,0.20) 22%,
-              rgba(150,15,15,0.09) 50%,
-              rgba(60,5,5,0.03)   76%,
+              rgba(240,61,48,0.32) 0%,
+              rgba(210,42,32,0.20) 22%,
+              rgba(140,22,16,0.09) 50%,
+              rgba(55,8,6,0.03)   76%,
               transparent          100%
             ),
             radial-gradient(ellipse 140% 100% at 50% 10%,
-              rgba(110,8,8,0.18)   0%,
-              rgba(55,4,4,0.07)    40%,
+              rgba(100,16,12,0.18)   0%,
+              rgba(52,8,6,0.07)    40%,
               transparent          70%
             )
           `,
@@ -81,8 +82,8 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
             fontSize: '17.5px',
             fontWeight: 500,
             letterSpacing: '0.04em',
-            color: '#ff6363',
-            textShadow: '0 0 18px rgba(255,99,99,0.55), 0 0 40px rgba(255,60,60,0.25)',
+            color: '#f03d30',
+            textShadow: '0 0 18px rgba(240,61,48,0.55), 0 0 40px rgba(220,42,32,0.25)',
           }}
         >
           {h.eyebrow}
@@ -109,7 +110,7 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
       >
         <span className="hero-headline-s1">
           {h.headline_pre}
-          <span style={{ color: '#ff6363' }}>{h.headline_accent}</span>
+          <span style={{ color: '#f03d30' }}>{h.headline_accent}</span>
           {h.headline_post}
         </span>
         <span className="hero-headline-s2">{h.headline_part2}</span>
@@ -156,10 +157,10 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
           onDrop={handleDrop}
           style={{
             cursor: isLoading ? 'default' : 'pointer',
-            border: `1.5px dashed ${isDragging ? 'rgba(255,99,99,0.55)' : 'rgba(54,55,57,0.8)'}`,
+            border: `1.5px dashed ${isDragging ? 'rgba(240,61,48,0.55)' : 'rgba(54,55,57,0.8)'}`,
             borderRadius: '11px',
             padding: '40px 32px',
-            background: isDragging ? 'rgba(255,63,63,0.04)' : 'rgba(7,8,10,0.7)',
+            background: isDragging ? 'rgba(240,61,48,0.04)' : 'rgba(7,8,10,0.7)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             flexDirection: 'column',
@@ -167,7 +168,7 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
             gap: '12px',
             transition: 'border-color 0.2s, background 0.2s, box-shadow 0.2s',
             boxShadow: isDragging
-              ? '0 0 0 4px rgba(255,99,99,0.07), 0 4px 24px rgba(0,0,0,0.4)'
+              ? '0 0 0 4px rgba(240,61,48,0.07), 0 4px 24px rgba(0,0,0,0.4)'
               : '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)',
           }}
         >
@@ -178,7 +179,7 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
               style={{
                 fontWeight: 500,
                 fontSize: '14px',
-                color: isDragging ? '#ff6363' : '#ffffff',
+                color: isDragging ? '#f03d30' : '#ffffff',
                 margin: '0 0 4px',
                 transition: 'color 0.2s',
               }}
@@ -188,7 +189,7 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
             {!isLoading && (
               <p style={{ fontSize: '12px', color: '#6a6b6c', margin: 0 }}>
                 o{' '}
-                <span style={{ color: '#ff6363', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                <span style={{ color: '#f03d30', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
                   {h.dropzone_select}
                 </span>
                 {' '}{h.dropzone_hint}
@@ -236,8 +237,29 @@ export function HeroDropzone({ onFileSelected, isLoading }: HeroDropzoneProps) {
         />
       </div>
 
+      {/* Error message */}
+      {error && !isLoading && (
+        <div
+          className="animate-fade-in"
+          style={{
+            position: 'relative',
+            marginTop: '16px',
+            padding: '10px 16px',
+            background: 'rgba(240,61,48,0.06)',
+            border: '1px solid rgba(240,61,48,0.2)',
+            borderRadius: '8px',
+            maxWidth: '520px',
+            width: '100%',
+          }}
+        >
+          <p style={{ fontSize: '12px', color: '#f03d30', margin: 0, textAlign: 'center' }}>
+            {error}
+          </p>
+        </div>
+      )}
+
       {/* Trust line */}
-      {!isLoading && (
+      {!isLoading && !error && (
         <p
           className="animate-fade-in"
           style={{
@@ -288,7 +310,7 @@ function UploadIcon({ dragging }: { dragging: boolean }) {
         height: '48px',
         borderRadius: '12px',
         background: '#111214',
-        border: `1px solid ${dragging ? 'rgba(255,99,99,0.3)' : '#363739'}`,
+        border: `1px solid ${dragging ? 'rgba(240,61,48,0.3)' : '#363739'}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -300,7 +322,7 @@ function UploadIcon({ dragging }: { dragging: boolean }) {
         height="20"
         viewBox="0 0 24 24"
         fill="none"
-        stroke={dragging ? '#ff6363' : '#9c9c9d'}
+        stroke={dragging ? '#f03d30' : '#9c9c9d'}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -323,7 +345,7 @@ function LoadingSpinner() {
         height: '48px',
         borderRadius: '12px',
         background: '#111214',
-        border: '1px solid rgba(255,99,99,0.2)',
+        border: '1px solid rgba(240,61,48,0.2)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -334,7 +356,7 @@ function LoadingSpinner() {
         height="20"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#ff6363"
+        stroke="#f03d30"
         strokeWidth="2"
         strokeLinecap="round"
         aria-hidden="true"

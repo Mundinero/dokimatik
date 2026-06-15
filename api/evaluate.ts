@@ -1,4 +1,4 @@
-export const config = { runtime: 'nodejs' }
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 export default async function handler(
   req: { method: string; body: { prompt?: string } },
@@ -23,7 +23,7 @@ export default async function handler(
     },
     body: JSON.stringify({
       model:      'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: 4096,
       messages:   [{ role: 'user', content: prompt }],
     }),
   })
