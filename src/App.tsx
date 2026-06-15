@@ -4,7 +4,7 @@ import { HeroDropzone } from './components/HeroDropzone'
 import { ScorecardShell } from './components/ScorecardShell'
 import { Scorecard } from './components/Scorecard'
 import { parseZip } from './lib/parseZip'
-import { evaluate } from './lib/callClaude'
+import { evaluate, translateEvaluation } from './lib/callClaude'
 import { useLanguage } from './context/LanguageContext'
 import type { EvaluationResult } from './constants/rubric'
 
@@ -15,8 +15,9 @@ export default function App() {
   const [error,         setError        ] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Current result follows the active language toggle instantly
-  const result = resultsByLang[lang] ?? null
+  // Scores are always from EN (canonical). Text follows the active language.
+  // Falls back to EN while ES translation is in progress.
+  const result = resultsByLang[lang] ?? resultsByLang['en'] ?? null
 
   const handleFileSelected = useCallback(async (file: File) => {
     setIsLoading(true)
@@ -24,28 +25,25 @@ export default function App() {
     setError(null)
 
     try {
-      const parsed = await parseZip(file)
+      const parsed   = await parseZip(file)
 
-      // Evaluate both languages in parallel — toggle becomes instant after load
-      const [enRes, esRes] = await Promise.allSettled([
-        evaluate(parsed, 'en'),
-        evaluate(parsed, 'es'),
-      ])
+      // Phase 1 — single canonical evaluation in English
+      const canonical = await evaluate(parsed)
+      setResultsByLang({ en: canonical })
+      setIsLoading(false)
 
-      const next: Partial<Record<'en' | 'es', EvaluationResult>> = {}
-      if (enRes.status === 'fulfilled') next.en = enRes.value
-      if (esRes.status === 'fulfilled') next.es = esRes.value
-
-      if (Object.keys(next).length === 0) throw new Error('Evaluation failed for both languages')
-
-      setResultsByLang(next)
       setTimeout(() => {
         scrollRef.current?.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
       }, 120)
+
+      // Phase 2 — lightweight translation, non-blocking, scores unchanged
+      translateEvaluation(canonical)
+        .then(es => setResultsByLang(prev => ({ ...prev, es })))
+        .catch(err => console.warn('ES translation failed, falling back to EN:', err))
+
     } catch (err) {
       console.error('Evaluation failed:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
-    } finally {
       setIsLoading(false)
     }
   }, [])

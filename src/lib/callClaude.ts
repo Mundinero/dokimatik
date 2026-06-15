@@ -1,7 +1,7 @@
 import { RUBRIC, computeWeightedScore } from '../constants/rubric'
 import type { EvaluationResult } from '../constants/rubric'
 import type { ParsedProject } from './parseZip'
-import { buildPrompt } from './buildPrompt'
+import { buildPrompt, buildTranslationPrompt } from './buildPrompt'
 
 interface ClaudePayload {
   projectType:     EvaluationResult['projectType']
@@ -12,8 +12,14 @@ interface ClaudePayload {
   hasAgentMemory:  boolean
 }
 
-export async function evaluate(project: ParsedProject, lang: 'en' | 'es' = 'en'): Promise<EvaluationResult> {
-  const raw = await callApi(buildPrompt(project, lang))
+interface TranslationPayload {
+  dimensions:      Record<string, string>
+  recommendations: Array<{ title: string; detail: string }>
+}
+
+// Phase 1 — canonical evaluation, always in English, scores are source of truth
+export async function evaluate(project: ParsedProject): Promise<EvaluationResult> {
+  const raw = await callApi(buildPrompt(project))
 
   let payload: ClaudePayload
   try {
@@ -43,8 +49,33 @@ export async function evaluate(project: ParsedProject, lang: 'en' | 'es' = 'en')
   }
 }
 
+// Phase 2 — lightweight translation of text fields only, scores cloned unchanged
+export async function translateEvaluation(canonical: EvaluationResult): Promise<EvaluationResult> {
+  const raw = await callApi(buildTranslationPrompt(canonical))
+
+  let t: TranslationPayload
+  try {
+    t = JSON.parse(raw)
+  } catch {
+    const match = raw.match(/```(?:json)?\s*([\s\S]+?)\s*```/)
+    t = JSON.parse(match?.[1] ?? raw)
+  }
+
+  return {
+    ...canonical,
+    dimensions: canonical.dimensions.map(d => ({
+      ...d,
+      justification: t.dimensions[d.dimension.id] ?? d.justification,
+    })),
+    recommendations: canonical.recommendations.map((r, i) => ({
+      ...r,
+      title:  t.recommendations[i]?.title  ?? r.title,
+      detail: t.recommendations[i]?.detail ?? r.detail,
+    })),
+  }
+}
+
 async function callApi(prompt: string): Promise<string> {
-  // Dev: call Claude API directly from browser
   if (import.meta.env.DEV && import.meta.env.VITE_ANTHROPIC_API_KEY) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -65,7 +96,6 @@ async function callApi(prompt: string): Promise<string> {
     return data.content[0].text as string
   }
 
-  // Production: Vercel Function proxies the key
   const res = await fetch('/api/evaluate', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

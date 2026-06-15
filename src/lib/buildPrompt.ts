@@ -1,13 +1,11 @@
 import type { ParsedProject } from './parseZip'
+import type { EvaluationResult } from '../constants/rubric'
 
-export function buildPrompt(project: ParsedProject, lang: 'en' | 'es' = 'en'): string {
+export function buildPrompt(project: ParsedProject): string {
   const p: string[] = []
-  const langInstruction = lang === 'es'
-    ? 'All "justification" strings and recommendation "title"/"detail" fields MUST be written in Spanish.'
-    : 'All "justification" strings and recommendation "title"/"detail" fields MUST be written in English.'
 
   p.push('You are a senior software engineer evaluating a vibe-coded project for production readiness.')
-  p.push(`Analyze the project below and return a JSON evaluation. ${langInstruction} Return ONLY valid JSON — no markdown fences, no explanation.\n`)
+  p.push('Analyze the project below and return a JSON evaluation in English. Return ONLY valid JSON — no markdown fences, no explanation.\n')
 
   p.push('## FILE TREE')
   p.push(project.fileTree.slice(0, 80).join('\n'))
@@ -63,4 +61,39 @@ export function buildPrompt(project: ParsedProject, lang: 'en' | 'es' = 'en'): s
 
   const full = p.join('\n')
   return full.length > 30_000 ? full.slice(0, 30_000) + '\n\n[truncated]' : full
+}
+
+// Lightweight prompt: translate text fields only, scores untouched
+export function buildTranslationPrompt(canonical: EvaluationResult): string {
+  const textOnly = {
+    dimensions: Object.fromEntries(
+      canonical.dimensions.map(d => [d.dimension.id, d.justification])
+    ),
+    recommendations: canonical.recommendations.map(r => ({ title: r.title, detail: r.detail })),
+  }
+
+  return `Translate the following evaluation text from English to Spanish.
+Keep technical terms (React, Vue, TypeScript, Node.js, Vite, Git, Docker, etc.) unchanged.
+Return ONLY valid JSON — no markdown fences, no explanation.
+
+Required JSON shape:
+{
+  "dimensions": {
+    "structure": "...",
+    "dependencies": "...",
+    "env_vars": "...",
+    "database": "...",
+    "versioning": "...",
+    "hosting": "...",
+    "security": "...",
+    "agent_memory": "...",
+    "error_handling": "..."
+  },
+  "recommendations": [
+    { "title": "...", "detail": "..." }
+  ]
+}
+
+Source:
+${JSON.stringify(textOnly)}`
 }
